@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>EduGenie - AI Learning Assistant🧠🤖✨</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div>
+
+                <h1>EduGenie</h1>
+
+                <p>
+                    Google Gemini Powered Learning Assistant
+                </p>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="hero">
+
+            <h2>
+                Learn Smarter with AI
+            </h2>
+
+            <p>
+                Ask questions, understand concepts,
+                generate quizzes, summarize content,
+                and build personalized learning paths.
+            </p>
+
+        </section>
+
+
+        <section class="card">
+
+            <label for="task">
+                Select Task
+            </label>
+
+            <select id="task">
+
+                <option value="qa">
+                    Q&A
+                </option>
+
+                <option value="explain">
+                    Explain
+                </option>
+
+                <option value="quiz">
+                    Quiz
+                </option>
+
+                <option value="summarize">
+                    Summary
+                </option>
+
+                <option value="learn">
+                    Recommend Learning Path
+                </option>
+
+            </select>
+
+
+            <label for="inputText">
+                Enter your question or content
+            </label>
+
+            <textarea
+                id="inputText"
+                rows="10"
+                placeholder="Enter your question, topic, or educational text here..."
+            ></textarea>
+
+
+            <div
+                id="learningOptions"
+                class="learning-options hidden"
+            >
+
+                <label for="level">
+                    Current Level
+                </label>
+
+                <select id="level">
+
+                    <option value="Beginner">
+                        Beginner
+                    </option>
+
+                    <option value="Intermediate">
+                        Intermediate
+                    </option>
+
+                    <option value="Advanced">
+                        Advanced
+                    </option>
+
+                </select>
+
+
+                <label for="hours">
+                    Hours per Week
+                </label>
+
+                <input
+                    id="hours"
+                    type="number"
+                    value="5"
+                    min="1"
+                    max="80"
+                >
+
+
+                <label for="goal">
+                    Learning Goal
+                </label>
+
+                <input
+                    id="goal"
+                    type="text"
+                    value="Understand the topic"
+                >
+
+            </div>
+
+
+            <button
+                id="submitBtn"
+                type="button"
+            >
+                Generate
+            </button>
+
+        </section>
+
+
+        <section
+            id="loading"
+            class="loading hidden"
+        >
+
+            <div class="spinner"></div>
+
+            <p>
+                EduGenie is thinking...
+            </p>
+
+        </section>
+
+
+        <section
+            id="resultSection"
+            class="card result-card hidden"
+        >
+
+            <h2>
+                Result
+            </h2>
+
+            <div id="result"></div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            EduGenie &copy; 2026
+        </p>
+
+    </footer>
+
+
+    <script>
+
+        const task = document.getElementById(
+            "task"
+        );
+
+        const inputText = document.getElementById(
+            "inputText"
+        );
+
+        const submitBtn = document.getElementById(
+            "submitBtn"
+        );
+
+        const resultSection = document.getElementById(
+            "resultSection"
+        );
+
+        const result = document.getElementById(
+            "result"
+        );
+
+        const loading = document.getElementById(
+            "loading"
+        );
+
+        const learningOptions =
+            document.getElementById(
+                "learningOptions"
+            );
+
+
+        task.addEventListener(
+            "change",
+            function () {
+
+                if (task.value === "learn") {
+
+                    learningOptions.classList.remove(
+                        "hidden"
+                    );
+
+                    inputText.placeholder =
+                        "Enter the topic you want to learn...";
+
+                } else {
+
+                    learningOptions.classList.add(
+                        "hidden"
+                    );
+
+                    inputText.placeholder =
+                        "Enter your question, topic, or educational text here...";
+                }
+
+            }
+        );
+
+
+        submitBtn.addEventListener(
+            "click",
+            submitRequest
+        );
+
+
+        async function submitRequest() {
+
+            const selectedTask =
+                task.value;
+
+            const text =
+                inputText.value.trim();
+
+
+            if (!text) {
+
+                showError(
+                    "Please enter some text first."
+                );
+
+                return;
+            }
+
+
+            setLoading(true);
+
+
+            try {
+
+                let response;
+
+
+                if (selectedTask === "qa") {
+
+                    response = await fetch(
+                        "/qa",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                text: text
+                            })
+                        }
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "explain"
+                ) {
+
+                    response = await fetch(
+                        "/explain",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                text: text
+                            })
+                        }
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "quiz"
+                ) {
+
+                    response = await fetch(
+                        "/quiz",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                text: text
+                            })
+                        }
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "summarize"
+                ) {
+
+                    response = await fetch(
+                        "/summarize",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                text: text
+                            })
+                        }
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "learn"
+                ) {
+
+                    const level =
+                        document.getElementById(
+                            "level"
+                        ).value;
+
+                    const hours =
+                        Number(
+                            document.getElementById(
+                                "hours"
+                            ).value
+                        );
+
+                    const goal =
+                        document.getElementById(
+                            "goal"
+                        ).value.trim();
+
+
+                    response = await fetch(
+                        "/learn/recommendations",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                topic: text,
+
+                                level: level,
+
+                                hours_per_week:
+                                    hours,
+
+                                goal:
+                                    goal ||
+                                    "Understand the topic"
+
+                            })
+                        }
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Something went wrong."
+                    );
+
+                }
+
+
+                if (
+                    selectedTask === "qa"
+                ) {
+
+                    displayText(
+                        data.answer
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "explain"
+                ) {
+
+                    displayText(
+                        data.explanation
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "summarize"
+                ) {
+
+                    displayText(
+                        data.summary
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "learn"
+                ) {
+
+                    displayText(
+                        data.recommendations
+                    );
+
+                }
+
+
+                else if (
+                    selectedTask === "quiz"
+                ) {
+
+                    displayQuiz(
+                        data.quiz
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                showError(
+                    error.message
+                );
+
+            }
+
+            finally {
+
+                setLoading(false);
+
+            }
+
+        }
+
+
+        function displayText(text) {
+
+            result.innerHTML = "";
+
+            const pre =
+                document.createElement(
+                    "div"
+                );
+
+            pre.className =
+                "text-result";
+
+            pre.textContent =
+                text;
+
+            result.appendChild(
+                pre
+            );
+
+            resultSection.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        function displayQuiz(quiz) {
+
+            result.innerHTML = "";
+
+
+            if (
+                !quiz ||
+                !quiz.questions ||
+                !quiz.questions.length
+            ) {
+
+                showError(
+                    "No quiz questions were generated."
+                );
+
+                return;
+
+            }
+
+
+            const quizContainer =
+                document.createElement(
+                    "div"
+                );
+
+            quizContainer.className =
+                "quiz-container";
+
+
+            quiz.questions.forEach(
+                (item, questionIndex) => {
+
+                    const questionBox =
+                        document.createElement(
+                            "div"
+                        );
+
+                    questionBox.className =
+                        "question-box";
+
+
+                    const questionTitle =
+                        document.createElement(
+                            "h3"
+                        );
+
+                    questionTitle.textContent =
+                        `${questionIndex + 1}. ${item.question}`;
+
+
+                    questionBox.appendChild(
+                        questionTitle
+                    );
+
+
+                    item.options.forEach(
+                        option => {
+
+                            const label =
+                                document.createElement(
+                                    "label"
+                                );
+
+                            label.className =
+                                "option";
+
+
+                            const radio =
+                                document.createElement(
+                                    "input"
+                                );
+
+                            radio.type =
+                                "radio";
+
+                            radio.name =
+                                `question-${questionIndex}`;
+
+                            radio.value =
+                                option;
+
+
+                            label.appendChild(
+                                radio
+                            );
+
+
+                            const span =
+                                document.createElement(
+                                    "span"
+                                );
+
+                            span.textContent =
+                                option;
+
+
+                            label.appendChild(
+                                span
+                            );
+
+
+                            questionBox.appendChild(
+                                label
+                            );
+
+                        }
+                    );
+
+
+                    const checkButton =
+                        document.createElement(
+                            "button"
+                        );
+
+                    checkButton.textContent =
+                        "Check Answer";
+
+                    checkButton.className =
+                        "check-button";
+
+
+                    const feedback =
+                        document.createElement(
+                            "p"
+                        );
+
+                    feedback.className =
+                        "feedback";
+
+
+                    checkButton.addEventListener(
+                        "click",
+                        function () {
+
+                            const selected =
+                                questionBox.querySelector(
+                                    "input[type='radio']:checked"
+                                );
+
+
+                            if (!selected) {
+
+                                feedback.textContent =
+                                    "Please select an answer.";
+
+                                feedback.className =
+                                    "feedback warning";
+
+                                return;
+
+                            }
+
+
+                            if (
+                                selected.value ===
+                                item.correct_answer
+                            ) {
+
+                                feedback.textContent =
+                                    "Correct!";
+
+                                feedback.className =
+                                    "feedback correct";
+
+                            } else {
+
+                                feedback.textContent =
+                                    `Incorrect. Correct answer: ${item.correct_answer}`;
+
+                                feedback.className =
+                                    "feedback incorrect";
+
+                            }
+
+                        }
+                    );
+
+
+                    questionBox.appendChild(
+                        checkButton
+                    );
+
+                    questionBox.appendChild(
+                        feedback
+                    );
+
+
+                    quizContainer.appendChild(
+                        questionBox
+                    );
+
+                }
+            );
+
+
+            result.appendChild(
+                quizContainer
+            );
+
+
+            resultSection.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        function showError(message) {
+
+            result.innerHTML = "";
+
+            const error =
+                document.createElement(
+                    "div"
+                );
+
+            error.className =
+                "error";
+
+            error.textContent =
+                message;
+
+            result.appendChild(
+                error
+            );
+
+            resultSection.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        function setLoading(isLoading) {
+
+            if (isLoading) {
+
+                loading.classList.remove(
+                    "hidden"
+                );
+
+                submitBtn.disabled =
+                    true;
+
+                submitBtn.textContent =
+                    "Generating...";
+
+            } else {
+
+                loading.classList.add(
+                    "hidden"
+                );
+
+                submitBtn.disabled =
+                    false;
+
+                submitBtn.textContent =
+                    "Generate";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
